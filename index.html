@@ -107,6 +107,7 @@
     .contact-thanks { display: none; padding: 34px 10px 12px; text-align: center; }
     .contact-thanks.visible { display: block; }
     .contact-thanks p { font-family: var(--font-elegant); font-size: clamp(1.35rem, 3vw, 2rem); color: var(--dark-green); }
+    .contact-submit-frame { display: none; }
     .reveal { opacity: 0; transform: translateY(36px); transition: opacity 0.85s ease, transform 0.85s ease; transition-delay: var(--delay, 0s); }
     .reveal.visible { opacity: 1; transform: translateY(0); }
     @media (max-width: 900px) {
@@ -277,7 +278,7 @@
         <p class="section-label footer-contact-label contact-hover" style="color: #b8974a;" data-email="contact@maximillianco.com">CONTACT</p>
         <a href="mailto:contact@maximillianco.com" class="footer-email">contact@maximillianco.com</a>
         <p class="footer-cities">San Francisco · New York · London · Zurich</p>
-        <button class="contact-trigger contact-hover" id="contactOpen" type="button" data-email="contact@maximillianco.com">Contact Us</button>
+        <button class="contact-trigger contact-hover" id="contactOpen" type="button" data-email="contact@maximillianco.com" data-open-contact>Contact Us</button>
         <p class="contact-status" id="footerContactStatus" aria-live="polite"></p>
       </div>
     </div>
@@ -293,7 +294,7 @@
       <div id="contactFormPanel">
         <h2 class="contact-form-heading" id="contactFormTitle">Contact Maximillianco</h2>
         <p class="contact-form-intro">Share your details and message with our office.</p>
-        <form class="contact-form" id="contactForm" action="https://formsubmit.co/ajax/contact@maximillianco.com" method="POST">
+        <form class="contact-form" id="contactForm" action="https://formsubmit.co/contact@maximillianco.com" method="POST" target="contactSubmitFrame">
           <input type="hidden" name="_subject" value="New Maximillianco contact form submission">
           <input type="hidden" name="_template" value="table">
           <input type="hidden" name="_captcha" value="false">
@@ -334,6 +335,7 @@
       </div>
     </div>
   </div>
+  <iframe name="contactSubmitFrame" class="contact-submit-frame" title="Contact form submission"></iframe>
 
   <script>
     const nav = document.getElementById('nav');
@@ -381,7 +383,14 @@
       contactOpen.focus();
     };
 
-    contactOpen.addEventListener('click', openContactForm);
+    document.querySelectorAll('[data-open-contact]').forEach(openControl => {
+      openControl.addEventListener('click', event => {
+        event.preventDefault();
+        navToggle.classList.remove('open');
+        navMenu.classList.remove('open');
+        openContactForm();
+      });
+    });
     document.querySelectorAll('[data-close-contact]').forEach(closeControl => {
       closeControl.addEventListener('click', closeContactForm);
     });
@@ -390,35 +399,20 @@
         closeContactForm();
       }
     });
-    contactForm.addEventListener('submit', async event => {
-      event.preventDefault();
+    contactForm.addEventListener('submit', () => {
       contactSubmit.disabled = true;
       contactSubmit.textContent = 'Sending...';
       contactFormStatus.textContent = 'Sending your message...';
       contactFormStatus.classList.remove('error');
 
-      try {
-        const response = await fetch(contactForm.action, {
-          method: 'POST',
-          body: new FormData(contactForm),
-          headers: { 'Accept': 'application/json' }
-        });
-
-        if (!response.ok) {
-          throw new Error('Contact form submission failed');
-        }
-
+      window.setTimeout(() => {
         contactForm.reset();
         contactFormPanel.style.display = 'none';
         contactThanks.classList.add('visible');
         footerContactStatus.textContent = 'Thank you for contacting Maximillianco.';
-      } catch (error) {
-        contactFormStatus.textContent = 'We could not send your message. Please email contact@maximillianco.com directly.';
-        contactFormStatus.classList.add('error');
-      } finally {
         contactSubmit.disabled = false;
         contactSubmit.textContent = 'Submit';
-      }
+      }, 600);
     });
   </script>
 </body>
