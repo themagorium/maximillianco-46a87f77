@@ -101,6 +101,9 @@
     .form-field input:focus, .form-field textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(184,151,74,0.12); outline: none; }
     .submit-contact { justify-self: start; margin-top: 6px; padding: 14px 26px; border: 1px solid var(--gold); border-radius: 999px; background: var(--dark-green); color: var(--cream); cursor: pointer; font-family: var(--font-sans); font-size: 0.68rem; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease; }
     .submit-contact:hover, .submit-contact:focus-visible { background: var(--gold); color: var(--dark-green); transform: translateY(-2px); outline: none; }
+    .submit-contact:disabled { cursor: wait; opacity: 0.72; transform: none; }
+    .form-status { min-height: 22px; color: var(--mid); font-size: 0.8rem; }
+    .form-status.error { color: #9f2d2d; }
     .contact-thanks { display: none; padding: 34px 10px 12px; text-align: center; }
     .contact-thanks.visible { display: block; }
     .contact-thanks p { font-family: var(--font-elegant); font-size: clamp(1.35rem, 3vw, 2rem); color: var(--dark-green); }
@@ -165,7 +168,7 @@
     <nav class="nav-menu" id="navMenu">
       <a href="#portfolio" class="nav-link">Portfolio</a>
       <a href="#about" class="nav-link">About</a>
-      <a href="#contact" class="nav-link contact-hover" data-email="contact@maximillianco.com">Contact</a>
+      <a href="#contact" class="nav-link contact-hover" data-email="contact@maximillianco.com" data-open-contact>Contact</a>
     </nav>
   </header>
 
@@ -290,36 +293,40 @@
       <div id="contactFormPanel">
         <h2 class="contact-form-heading" id="contactFormTitle">Contact Maximillianco</h2>
         <p class="contact-form-intro">Share your details and message with our office.</p>
-        <form class="contact-form" id="contactForm">
+        <form class="contact-form" id="contactForm" action="https://formsubmit.co/ajax/contact@maximillianco.com" method="POST">
+          <input type="hidden" name="_subject" value="New Maximillianco contact form submission">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_captcha" value="false">
           <div class="form-row">
             <div class="form-field">
               <label for="firstName">First Name</label>
-              <input id="firstName" name="firstName" type="text" autocomplete="given-name" required>
+              <input id="firstName" name="First Name" type="text" autocomplete="given-name" required>
             </div>
             <div class="form-field">
               <label for="lastName">Last Name</label>
-              <input id="lastName" name="lastName" type="text" autocomplete="family-name" required>
+              <input id="lastName" name="Last Name" type="text" autocomplete="family-name" required>
             </div>
           </div>
           <div class="form-field">
             <label for="email">Email Address</label>
-            <input id="email" name="email" type="email" autocomplete="email" required>
+            <input id="email" name="Email Address" type="email" autocomplete="email" required>
           </div>
           <div class="form-row">
             <div class="form-field">
               <label for="countryCode">Country Code</label>
-              <input id="countryCode" name="countryCode" type="tel" autocomplete="tel-country-code" placeholder="+1" required>
+              <input id="countryCode" name="Country Code" type="tel" autocomplete="tel-country-code" placeholder="+1" required>
             </div>
             <div class="form-field">
               <label for="phone">Phone Number</label>
-              <input id="phone" name="phone" type="tel" autocomplete="tel-national" required>
+              <input id="phone" name="Phone Number" type="tel" autocomplete="tel-national" required>
             </div>
           </div>
           <div class="form-field">
             <label for="message">Your Message</label>
-            <textarea id="message" name="message" required></textarea>
+            <textarea id="message" name="Your Message" required></textarea>
           </div>
-          <button class="submit-contact" type="submit">Submit</button>
+          <p class="form-status" id="contactFormStatus" aria-live="polite"></p>
+          <button class="submit-contact" id="contactSubmit" type="submit">Submit</button>
         </form>
       </div>
       <div class="contact-thanks" id="contactThanks" aria-live="polite">
@@ -353,10 +360,14 @@
     const contactFormPanel = document.getElementById('contactFormPanel');
     const contactThanks = document.getElementById('contactThanks');
     const footerContactStatus = document.getElementById('footerContactStatus');
+    const contactFormStatus = document.getElementById('contactFormStatus');
+    const contactSubmit = document.getElementById('contactSubmit');
 
     const openContactForm = () => {
       contactFormPanel.style.display = '';
       contactThanks.classList.remove('visible');
+      contactFormStatus.textContent = '';
+      contactFormStatus.classList.remove('error');
       contactModal.classList.add('open');
       contactModal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
@@ -379,12 +390,35 @@
         closeContactForm();
       }
     });
-    contactForm.addEventListener('submit', event => {
+    contactForm.addEventListener('submit', async event => {
       event.preventDefault();
-      contactForm.reset();
-      contactFormPanel.style.display = 'none';
-      contactThanks.classList.add('visible');
-      footerContactStatus.textContent = 'Thank you for contacting Maximillianco.';
+      contactSubmit.disabled = true;
+      contactSubmit.textContent = 'Sending...';
+      contactFormStatus.textContent = 'Sending your message...';
+      contactFormStatus.classList.remove('error');
+
+      try {
+        const response = await fetch(contactForm.action, {
+          method: 'POST',
+          body: new FormData(contactForm),
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (!response.ok) {
+          throw new Error('Contact form submission failed');
+        }
+
+        contactForm.reset();
+        contactFormPanel.style.display = 'none';
+        contactThanks.classList.add('visible');
+        footerContactStatus.textContent = 'Thank you for contacting Maximillianco.';
+      } catch (error) {
+        contactFormStatus.textContent = 'We could not send your message. Please email contact@maximillianco.com directly.';
+        contactFormStatus.classList.add('error');
+      } finally {
+        contactSubmit.disabled = false;
+        contactSubmit.textContent = 'Submit';
+      }
     });
   </script>
 </body>
