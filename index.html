@@ -29,6 +29,9 @@
     .nav-link:hover { color: var(--gold); }
     .contact-hover::after { content: attr(data-email); position: absolute; left: 50%; top: calc(100% + 14px); transform: translate(-50%, 8px); opacity: 0; pointer-events: none; padding: 9px 14px; border: 1px solid rgba(184,151,74,0.25); border-radius: 999px; background: rgba(250,249,246,0.98); color: var(--dark-green); box-shadow: 0 14px 35px rgba(26,28,26,0.11); font-family: var(--font-elegant); font-size: 0.72rem; font-weight: 400; letter-spacing: 0.02em; text-transform: none; white-space: nowrap; transition: opacity 0.25s ease, transform 0.25s ease; }
     .contact-hover:hover::after, .contact-hover:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
+    .investor-hover { position: relative; display: inline-block; }
+    .investor-hover::after { content: attr(data-investor-email); position: absolute; left: 50%; top: calc(100% + 12px); z-index: 10; transform: translate(-50%, 8px); opacity: 0; pointer-events: none; padding: 9px 14px; border: 1px solid rgba(184,151,74,0.25); border-radius: 999px; background: rgba(250,249,246,0.98); color: var(--dark-green); box-shadow: 0 14px 35px rgba(26,28,26,0.11); font-family: var(--font-elegant); font-size: 0.72rem; font-weight: 400; letter-spacing: 0.02em; text-transform: none; white-space: nowrap; transition: opacity 0.25s ease, transform 0.25s ease; }
+    .investor-hover:hover::after, .investor-hover:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
     .nav-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
     .nav-toggle span { display: block; width: 24px; height: 1px; background: var(--dark); transition: transform 0.3s, opacity 0.3s; }
     .nav-toggle.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
@@ -73,6 +76,7 @@
     .footer { background: var(--dark-green); color: #fff; padding: 80px 48px 32px; }
     .footer-inner { display: flex; justify-content: space-between; align-items: flex-start; gap: 60px; flex-wrap: wrap; max-width: 1100px; margin: 0 auto 60px; }
     .footer-logo { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 300; letter-spacing: 0.15em; color: #fff; margin-bottom: 12px; }
+    .footer-logo.investor-hover::after, .footer-bottom .investor-hover::after { top: auto; bottom: calc(100% + 12px); background: rgba(27,36,32,0.96); color: var(--cream); border-color: rgba(212,185,106,0.35); box-shadow: 0 18px 40px rgba(0,0,0,0.25); }
     .footer-tagline { font-family: var(--font-sans); font-size: 0.75rem; font-weight: 300; color: rgba(255,255,255,0.45); }
     .footer-email { display: block; font-family: var(--font-sans); font-size: 0.85rem; font-weight: 300; color: rgba(255,255,255,0.75); text-decoration: none; margin-bottom: 12px; margin-top: 8px; }
     .footer-cities { font-family: var(--font-sans); font-size: 0.75rem; font-weight: 300; color: rgba(255,255,255,0.45); }
@@ -162,7 +166,7 @@
 </head>
 <body>
   <header class="nav" id="nav">
-    <a href="#" class="nav-logo">MAXIMILLIANCO</a>
+    <a href="#" class="nav-logo investor-hover" data-investor-email="investorrelations@maximillianco.com">MAXIMILLIANCO</a>
     <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
       <span></span><span></span><span></span>
     </button>
@@ -262,7 +266,7 @@
       <h2 class="section-heading">A Legacy of<br>Considered Growth</h2>
       <div class="rule-short"></div>
       <div class="about-body">
-        <p>MAXIMILLIANCO is an international investment holding company with a portfolio spanning energy, sustainability, real estate, technology, hospitality, and ESG. We take a long-term, principled approach to capital allocation — building enduring value across sectors and geographies that shape the future.</p>
+        <p><span class="investor-hover" data-investor-email="investorrelations@maximillianco.com">MAXIMILLIANCO</span> is an international investment holding company with a portfolio spanning energy, sustainability, real estate, technology, hospitality, and ESG. We take a long-term, principled approach to capital allocation — building enduring value across sectors and geographies that shape the future.</p>
         <p>Our philosophy is rooted in patience, precision, and a deep commitment to responsible stewardship. Every investment reflects our conviction that excellence and integrity are not merely compatible — they are inseparable.</p>
       </div>
     </div>
@@ -271,7 +275,7 @@
   <footer class="footer" id="contact">
     <div class="footer-inner">
       <div class="footer-brand">
-        <div class="footer-logo">MAXIMILLIANCO</div>
+        <div class="footer-logo investor-hover" data-investor-email="investorrelations@maximillianco.com">MAXIMILLIANCO</div>
         <div class="footer-tagline">International Investments &amp; Holdings</div>
       </div>
       <div class="footer-contact">
@@ -283,7 +287,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2026 MAXIMILLIANCO. All rights reserved.</p>
+      <p>&copy; 2026 <span class="investor-hover" data-investor-email="investorrelations@maximillianco.com">MAXIMILLIANCO</span>. All rights reserved.</p>
     </div>
   </footer>
 
@@ -292,7 +296,7 @@
     <div class="contact-dialog" role="dialog" aria-modal="true" aria-labelledby="contactFormTitle">
       <button class="contact-close" type="button" aria-label="Close contact form" data-close-contact>&times;</button>
       <div id="contactFormPanel">
-        <h2 class="contact-form-heading" id="contactFormTitle">Contact Maximillianco</h2>
+        <h2 class="contact-form-heading" id="contactFormTitle">Contact <span class="investor-hover" data-investor-email="investorrelations@maximillianco.com">Maximillianco</span></h2>
         <p class="contact-form-intro">Share your details and message with our office.</p>
         <form class="contact-form" id="contactForm" action="https://formsubmit.co/contact@maximillianco.com" method="POST" target="contactSubmitFrame">
           <input type="hidden" name="_subject" value="New Maximillianco contact form submission">
@@ -331,7 +335,7 @@
         </form>
       </div>
       <div class="contact-thanks" id="contactThanks" aria-live="polite">
-        <p>Thank you for contacting Maximillianco.</p>
+        <p>Thank you for contacting <span class="investor-hover" data-investor-email="investorrelations@maximillianco.com">Maximillianco</span>.</p>
       </div>
     </div>
   </div>
@@ -409,7 +413,7 @@
         contactForm.reset();
         contactFormPanel.style.display = 'none';
         contactThanks.classList.add('visible');
-        footerContactStatus.textContent = 'Thank you for contacting Maximillianco.';
+        footerContactStatus.innerHTML = 'Thank you for contacting <span class="investor-hover" data-investor-email="investorrelations@maximillianco.com">Maximillianco</span>.';
         contactSubmit.disabled = false;
         contactSubmit.textContent = 'Submit';
       }, 600);
