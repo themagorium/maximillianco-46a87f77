@@ -29,9 +29,9 @@
     .nav-link:hover { color: var(--gold); }
     .contact-hover::after { content: attr(data-email); position: absolute; left: 50%; top: calc(100% + 14px); transform: translate(-50%, 8px); opacity: 0; pointer-events: none; padding: 9px 14px; border: 1px solid rgba(184,151,74,0.25); border-radius: 999px; background: rgba(250,249,246,0.98); color: var(--dark-green); box-shadow: 0 14px 35px rgba(26,28,26,0.11); font-family: var(--font-elegant); font-size: 0.72rem; font-weight: 400; letter-spacing: 0.02em; text-transform: none; white-space: nowrap; transition: opacity 0.25s ease, transform 0.25s ease; }
     .contact-hover:hover::after, .contact-hover:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
-    .investor-hover { position: relative; display: inline-block; }
-    .investor-hover::after { content: attr(data-investor-email); position: absolute; left: 50%; top: calc(100% + 12px); z-index: 10; transform: translate(-50%, 8px); opacity: 0; pointer-events: none; padding: 9px 14px; border: 1px solid rgba(184,151,74,0.25); border-radius: 999px; background: rgba(250,249,246,0.98); color: var(--dark-green); box-shadow: 0 14px 35px rgba(26,28,26,0.11); font-family: var(--font-elegant); font-size: 0.72rem; font-weight: 400; letter-spacing: 0.02em; text-transform: none; white-space: nowrap; transition: opacity 0.25s ease, transform 0.25s ease; }
-    .investor-hover:hover::after, .investor-hover:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
+    .investor-hover { display: inline-block; cursor: help; }
+    .investor-tooltip { position: fixed; left: 0; top: 0; z-index: 300; transform: translate(-50%, 8px); opacity: 0; visibility: hidden; pointer-events: none; padding: 9px 14px; border: 1px solid rgba(184,151,74,0.25); border-radius: 999px; background: rgba(250,249,246,0.98); color: var(--dark-green); box-shadow: 0 14px 35px rgba(26,28,26,0.11); font-family: var(--font-elegant); font-size: 0.72rem; font-weight: 400; letter-spacing: 0.02em; text-transform: none; white-space: nowrap; transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease; }
+    .investor-tooltip.visible { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
     .nav-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
     .nav-toggle span { display: block; width: 24px; height: 1px; background: var(--dark); transition: transform 0.3s, opacity 0.3s; }
     .nav-toggle.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
@@ -76,7 +76,6 @@
     .footer { background: var(--dark-green); color: #fff; padding: 80px 48px 32px; }
     .footer-inner { display: flex; justify-content: space-between; align-items: flex-start; gap: 60px; flex-wrap: wrap; max-width: 1100px; margin: 0 auto 60px; }
     .footer-logo { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 300; letter-spacing: 0.15em; color: #fff; margin-bottom: 12px; }
-    .footer-logo.investor-hover::after, .footer-bottom .investor-hover::after { top: auto; bottom: calc(100% + 12px); background: rgba(27,36,32,0.96); color: var(--cream); border-color: rgba(212,185,106,0.35); box-shadow: 0 18px 40px rgba(0,0,0,0.25); }
     .footer-tagline { font-family: var(--font-sans); font-size: 0.75rem; font-weight: 300; color: rgba(255,255,255,0.45); }
     .footer-email { display: block; font-family: var(--font-sans); font-size: 0.85rem; font-weight: 300; color: rgba(255,255,255,0.75); text-decoration: none; margin-bottom: 12px; margin-top: 8px; }
     .footer-cities { font-family: var(--font-sans); font-size: 0.75rem; font-weight: 300; color: rgba(255,255,255,0.45); }
@@ -137,6 +136,7 @@
       .footer { padding: 60px 20px 28px; text-align: center; }
       .footer-inner { flex-direction: column; gap: 40px; align-items: center; text-align: center; }
       .contact-hover::after { display: none; }
+      .investor-tooltip { max-width: calc(100vw - 32px); white-space: normal; text-align: center; }
       .contact-dialog { padding: 36px 22px 28px; }
       .form-row { grid-template-columns: 1fr; }
       .submit-contact { justify-self: stretch; }
@@ -166,7 +166,7 @@
 </head>
 <body>
   <header class="nav" id="nav">
-    <a href="#" class="nav-logo investor-hover" data-investor-email="investorrelations@maximillianco.com">MAXIMILLIANCO</a>
+    <span class="nav-logo investor-hover" tabindex="0" data-investor-email="investorrelations@maximillianco.com">MAXIMILLIANCO</span>
     <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
       <span></span><span></span><span></span>
     </button>
@@ -340,6 +340,7 @@
     </div>
   </div>
   <iframe name="contactSubmitFrame" class="contact-submit-frame" title="Contact form submission"></iframe>
+  <div class="investor-tooltip" id="investorTooltip" role="tooltip" aria-hidden="true"></div>
 
   <script>
     const nav = document.getElementById('nav');
@@ -368,6 +369,80 @@
     const footerContactStatus = document.getElementById('footerContactStatus');
     const contactFormStatus = document.getElementById('contactFormStatus');
     const contactSubmit = document.getElementById('contactSubmit');
+    const investorTooltip = document.getElementById('investorTooltip');
+    let activeInvestorElement = null;
+
+    const positionInvestorTooltip = target => {
+      const rect = target.getBoundingClientRect();
+      const tooltipRect = investorTooltip.getBoundingClientRect();
+      const horizontalPadding = 16;
+      const left = Math.min(
+        Math.max(rect.left + rect.width / 2, horizontalPadding + tooltipRect.width / 2),
+        window.innerWidth - horizontalPadding - tooltipRect.width / 2
+      );
+      let top = rect.bottom + 12;
+
+      if (top + tooltipRect.height > window.innerHeight - 12) {
+        top = Math.max(12, rect.top - tooltipRect.height - 12);
+      }
+
+      investorTooltip.style.left = `${left}px`;
+      investorTooltip.style.top = `${top}px`;
+    };
+
+    const showInvestorTooltip = target => {
+      const email = target.dataset.investorEmail;
+      if (!email) return;
+
+      activeInvestorElement = target;
+      investorTooltip.textContent = email;
+      investorTooltip.setAttribute('aria-hidden', 'false');
+      target.setAttribute('aria-describedby', 'investorTooltip');
+      investorTooltip.classList.add('visible');
+      positionInvestorTooltip(target);
+    };
+
+    const hideInvestorTooltip = () => {
+      if (activeInvestorElement) {
+        activeInvestorElement.removeAttribute('aria-describedby');
+      }
+
+      activeInvestorElement = null;
+      investorTooltip.classList.remove('visible');
+      investorTooltip.setAttribute('aria-hidden', 'true');
+    };
+
+    document.addEventListener('mouseover', event => {
+      const target = event.target.closest('.investor-hover');
+      if (target) {
+        showInvestorTooltip(target);
+      }
+    });
+
+    document.addEventListener('mousemove', () => {
+      if (activeInvestorElement) {
+        positionInvestorTooltip(activeInvestorElement);
+      }
+    });
+
+    document.addEventListener('mouseout', event => {
+      if (activeInvestorElement && !activeInvestorElement.contains(event.relatedTarget)) {
+        hideInvestorTooltip();
+      }
+    });
+
+    document.addEventListener('focusin', event => {
+      const target = event.target.closest('.investor-hover');
+      if (target) {
+        showInvestorTooltip(target);
+      }
+    });
+
+    document.addEventListener('focusout', event => {
+      if (activeInvestorElement && activeInvestorElement === event.target) {
+        hideInvestorTooltip();
+      }
+    });
 
     const openContactForm = () => {
       contactFormPanel.style.display = '';
